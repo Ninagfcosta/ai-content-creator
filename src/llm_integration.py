@@ -1,30 +1,54 @@
-import anthropic
+import openai
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def generate_content(prompt, max_tokens=1000):
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    """
+    Generate content using OpenAI API.
+    """
+    client = openai.OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
     try:
-        message = client.messages.create(
-            model="claude-sonnet-4-5",
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             max_tokens=max_tokens,
             messages=[
                 {"role": "user", "content": prompt}
             ]
         )
-        return message.content[0].text
+        return response.choices[0].message.content
+
+    except openai.AuthenticationError as e:
+        print(f"Authentication Error: {e}")
+        return None
+
+    except openai.RateLimitError as e:
+        print(f"Rate Limit Error: {e}")
+        return None
+
     except Exception as e:
         print(f"Error: {e}")
         return None
 
+
 if __name__ == "__main__":
-    print("Testing API connection...")
-    result = generate_content("Say hello from NovaTech Apps in one sentence.")
+    print("=" * 50)
+    print("NOVATECH APPS - AI Content Creator")
+    print("Testing OpenAI API connection...")
+    print("=" * 50)
+
+    result = generate_content(
+        "Say hello from NovaTech Apps in one sentence."
+    )
+
     if result:
-        print("SUCCESS! API Response:")
+        print("\nSUCCESS! API Response:")
+        print("-" * 40)
         print(result)
+        print("-" * 40)
     else:
         print("FAILED - Check your API key")
-        
